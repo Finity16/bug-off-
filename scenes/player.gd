@@ -10,11 +10,15 @@ extends CharacterBody2D
 
 var facing := Vector2.RIGHT
 var can_attack := true
+var dead := false
 
 func _ready():
 	add_to_group("player")
 
 func _physics_process(delta):
+	if dead:
+		return
+
 	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	if dir != Vector2.ZERO:
 		velocity = velocity.move_toward(dir * speed, accel * delta)
@@ -37,5 +41,10 @@ func attack():
 	await get_tree().create_timer(attack_cooldown).timeout
 	can_attack = true
 
-func take_hit(_dmg: int, from_dir: Vector2):
-	velocity = from_dir * 300.0
+func take_hit(_dmg: int, _from_dir: Vector2):
+	if dead:
+		return
+	dead = true
+	print("squashed!")
+	await get_tree().create_timer(0.6).timeout
+	get_tree().reload_current_scene()

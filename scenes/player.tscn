@@ -7,7 +7,7 @@
 radius = 24.083189
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_nt6kf"]
-radius = 20.0
+radius = 27.166155
 
 [node name="Player" type="CharacterBody2D" unique_id=804416360]
 script = ExtResource("1_g2els")
@@ -24,5 +24,5 @@ shape = SubResource("CircleShape2D_ob1uy")
 [node name="HitArea" type="Area2D" parent="Pivot" unique_id=317560219]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Pivot/HitArea" unique_id=157869468]
-position = Vector2(28, 0)
+position = Vector2(27, 0)
 shape = SubResource("CircleShape2D_nt6kf")
