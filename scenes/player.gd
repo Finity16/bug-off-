@@ -1,22 +1,53 @@
 extends CharacterBody2D
 
-@export var speed := 220.0
+@export var speed := 300.0
 @export var accel := 1400.0
 @export var friction := 1000.0
-@export var attack_cooldown := 0.35
+@export var attack_cooldown := 0.6
+@export var attack_stun := 0.2
+@export var attack_radius := 110.0
+@export var attack_arc := 90.0
 
 @onready var pivot: Node2D = $Pivot
-@onready var hit_area: Area2D = $Pivot/HitArea
+@onready var body_shape: CollisionShape2D = $CollisionShape2D
 
 var facing := Vector2.RIGHT
 var can_attack := true
+var stunned := false
 var dead := false
+var wedge: Polygon2D
 
 func _ready():
+	collision_mask = 3
 	add_to_group("player")
+	add_to_group("player")
+	wedge = Polygon2D.new()
+	wedge.polygon = make_wedge(attack_radius, attack_arc)
+	wedge.color = Color(1, 1, 1, 0)
+	pivot.add_child(wedge)
+
+func make_wedge(radius: float, arc_degrees: float) -> PackedVector2Array:
+	var points := PackedVector2Array([Vector2.ZERO])
+	var half := deg_to_rad(arc_degrees / 2.0)
+	var steps := 16
+	for i in steps + 1:
+		var a := -half + (half * 2.0) * i / steps
+		points.append(Vector2.from_angle(a) * radius)
+	return points
+
+func get_body_radius() -> float:
+	var circle := body_shape.shape as CircleShape2D
+	if circle == null:
+		return 16.0
+	return circle.radius * body_shape.global_scale.x
 
 func _physics_process(delta):
 	if dead:
+		return
+
+	if stunned:
+		velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
+		move_and_slide()
 		return
 
 	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
@@ -32,14 +63,35 @@ func _physics_process(delta):
 	if Input.is_action_just_pressed("attack") and can_attack:
 		attack()
 
+func wedge_hits(human: Node2D) -> bool:
+	var to_human := human.global_position - global_position
+	var distance := to_human.length()
+	var radius: float = human.get_body_radius()
+	if distance - radius > attack_radius:
+		return false
+	if distance <= radius:
+		return true
+	var tolerance := asin(minf(radius / distance, 1.0))
+	var limit := deg_to_rad(attack_arc / 2.0) + tolerance
+	return absf(angle_difference(facing.angle(), to_human.angle())) <= limit
+
 func attack():
 	can_attack = false
-	velocity += facing * 250.0
-	for body in hit_area.get_overlapping_bodies():
-		if body.is_in_group("humans"):
-			body.take_hit(1, facing)
-	await get_tree().create_timer(attack_cooldown).timeout
+	stunned = true
+	velocity = Vector2.ZERO
+	flash_wedge()
+	for human in get_tree().get_nodes_in_group("humans"):
+		if wedge_hits(human):
+			human.take_hit(1, facing)
+	await get_tree().create_timer(attack_stun).timeout
+	stunned = false
+	await get_tree().create_timer(maxf(attack_cooldown - attack_stun, 0.0)).timeout
 	can_attack = true
+
+func flash_wedge():
+	wedge.color = Color(1, 1, 1, 0.9)
+	var tween := create_tween()
+	tween.tween_property(wedge, "color:a", 0.0, 0.15)
 
 func take_hit(_dmg: int, _from_dir: Vector2):
 	if dead:

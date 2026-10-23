@@ -10,3 +10,9 @@ position = Vector2(577, 333)
 
 [node name="Human" parent="." unique_id=1264052602 instance=ExtResource("2_0wfyh")]
 position = Vector2(199, 131)
+
+[node name="Human2" parent="." unique_id=1589010053 instance=ExtResource("2_0wfyh")]
+position = Vector2(272, 464)
+
+[node name="Human3" parent="." unique_id=1266345930 instance=ExtResource("2_0wfyh")]
+position = Vector2(1013, 151)
