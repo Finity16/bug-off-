@@ -1,3 +1,4 @@
+class_name Human
 extends CharacterBody2D
 
 signal died(points: int)
@@ -31,9 +32,8 @@ func _ready():
 	collision_layer = 2
 	collision_mask = 1
 	add_to_group("humans")
-	add_to_group("humans")
 	telegraph = Polygon2D.new()
-	telegraph.polygon = make_wedge(hit_range, attack_arc)
+	telegraph.polygon = get_telegraph_shape()
 	telegraph.color = Color(1, 0, 0, 0)
 	add_child(telegraph)
 	var shader := Shader.new()
@@ -47,6 +47,9 @@ void fragment() {
 	flash_material = ShaderMaterial.new()
 	flash_material.shader = shader
 	sprite.material = flash_material
+
+func get_telegraph_shape() -> PackedVector2Array:
+	return make_wedge(hit_range, attack_arc)
 
 func make_wedge(radius: float, arc_degrees: float) -> PackedVector2Array:
 	var points := PackedVector2Array([Vector2.ZERO])
@@ -76,17 +79,20 @@ func _physics_process(delta):
 
 	match state:
 		State.CHASE:
-			var to_player := player.global_position - global_position
-			if can_attack and to_player.length() < attack_range:
-				start_attack()
-			else:
-				velocity = to_player.normalized() * speed
+			chase(delta)
 		State.WINDUP:
 			tick_windup(delta)
 			velocity = velocity.move_toward(Vector2.ZERO, 600.0 * delta)
 		_:
 			velocity = velocity.move_toward(Vector2.ZERO, 600.0 * delta)
 	move_and_slide()
+
+func chase(_delta: float):
+	var to_player := player.global_position - global_position
+	if can_attack and to_player.length() < attack_range:
+		start_attack()
+	else:
+		velocity = to_player.normalized() * speed
 
 func player_in_attack_area() -> bool:
 	var to_player := player.global_position - global_position

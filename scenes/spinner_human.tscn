@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://bgw17okcgefuq"]
+
+[ext_resource type="Script" uid="uid://dhh344340vqp5" path="res://scenes/spinner_human.gd" id="1_13abf"]
+[ext_resource type="Texture2D" uid="uid://bla28axqtttob" path="res://icon.svg" id="2_mokjf"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ob1uy"]
+radius = 47.07441
+
+[node name="Human" type="CharacterBody2D" unique_id=1264052602]
+script = ExtResource("1_13abf")
+health = 3.0
+attack_range = 200.0
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=433660675]
+modulate = Color(0.4944951, 0.76668376, 0.3305974, 1)
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("2_mokjf")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1324441236]
+shape = SubResource("CircleShape2D_ob1uy")

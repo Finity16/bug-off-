@@ -1,18 +1,18 @@
 [gd_scene format=3 uid="uid://ctfv52gkj0n00"]
 
 [ext_resource type="PackedScene" uid="uid://b8x0v32cc5hu6" path="res://scenes/player.tscn" id="1_o5qli"]
-[ext_resource type="PackedScene" uid="uid://44bwlakmln7m" path="res://scenes/human.tscn" id="2_0wfyh"]
+[ext_resource type="Script" uid="uid://djjd5q64a1ea4" path="res://scenes/wave_spawner.gd" id="2_0wfyh"]
+[ext_resource type="PackedScene" uid="uid://bgw17okcgefuq" path="res://scenes/spinner_human.tscn" id="3_sugp2"]
+[ext_resource type="PackedScene" uid="uid://44bwlakmln7m" path="res://scenes/human.tscn" id="3_tbgi4"]
+[ext_resource type="PackedScene" uid="uid://y1bge88h4xcg" path="res://scenes/smart_human.tscn" id="5_tefeu"]
 
 [node name="Main" type="Node2D" unique_id=883377612]
 
 [node name="Player" parent="." unique_id=804416360 instance=ExtResource("1_o5qli")]
 position = Vector2(577, 333)
 
-[node name="Human" parent="." unique_id=1264052602 instance=ExtResource("2_0wfyh")]
-position = Vector2(199, 131)
-
-[node name="Human2" parent="." unique_id=1589010053 instance=ExtResource("2_0wfyh")]
-position = Vector2(272, 464)
-
-[node name="Human3" parent="." unique_id=1266345930 instance=ExtResource("2_0wfyh")]
-position = Vector2(1013, 151)
+[node name="WaveSpawner" type="Node" parent="." unique_id=226179658]
+script = ExtResource("2_0wfyh")
+human_scene = ExtResource("3_tbgi4")
+spinner_scene = ExtResource("3_sugp2")
+smart_scene = ExtResource("5_tefeu")
