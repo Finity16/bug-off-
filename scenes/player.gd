@@ -7,7 +7,10 @@ extends CharacterBody2D
 @export var attack_stun := 0.2
 @export var attack_radius := 110.0
 @export var attack_arc := 90.0
+@export var frame_width := 32
+@export var fly_fps := 12.0
 
+@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var pivot: Node2D = $Pivot
 @onready var body_shape: CollisionShape2D = $CollisionShape2D
 
@@ -25,6 +28,8 @@ func _ready():
 	wedge.polygon = make_wedge(attack_radius, attack_arc)
 	wedge.color = Color(1, 1, 1, 0)
 	pivot.add_child(wedge)
+	sprite.sprite_frames = build_frames("res://art/Bug.png")
+	sprite.play("fly")
 
 func make_wedge(radius: float, arc_degrees: float) -> PackedVector2Array:
 	var points := PackedVector2Array([Vector2.ZERO])
@@ -59,6 +64,7 @@ func _physics_process(delta):
 
 	facing = (get_global_mouse_position() - global_position).normalized()
 	pivot.rotation = facing.angle()
+	sprite.flip_h = facing.x < 0
 
 	if Input.is_action_just_pressed("attack") and can_attack:
 		attack()
@@ -100,3 +106,18 @@ func take_hit(_dmg: int, _from_dir: Vector2):
 	print("squashed!")
 	await get_tree().create_timer(0.6).timeout
 	get_tree().reload_current_scene()
+	
+func build_frames(path: String) -> SpriteFrames:
+	var sheet: Texture2D = load(path)
+	var total := int(sheet.get_width() / frame_width)
+	var frames := SpriteFrames.new()
+	frames.remove_animation("default")
+	frames.add_animation("fly")
+	frames.set_animation_speed("fly", fly_fps)
+	frames.set_animation_loop("fly", true)
+	for i in maxi(total, 1):
+		var atlas := AtlasTexture.new()
+		atlas.atlas = sheet
+		atlas.region = Rect2(i * frame_width, 0, frame_width, sheet.get_height())
+		frames.add_frame("fly", atlas)
+	return frames
