@@ -22,6 +22,9 @@ var wave := 0
 var alive := 0
 var spawning_done := false
 
+func get_sheet_paths() -> PackedStringArray:
+	return PackedStringArray(["res://art/SmartHuman.png"])
+	
 func _ready():
 	start_wave.call_deferred()
 
@@ -48,13 +51,21 @@ func run_wave(count: int, level: int):
 	var queue := build_queue(count)
 	for i in queue.size():
 		while alive >= max_alive_at_once:
+			if not is_inside_tree():
+				return
 			await get_tree().process_frame
+			if not is_inside_tree():
+				return
+		if not is_inside_tree():
+			return
 		spawn_enemy(queue[i], level)
 		alive += 1
 		if i < queue.size() - 1:
 			var wait := randf_range(spawn_interval_min, spawn_interval_max)
 			while wait > 0.0 and alive > 0:
 				await get_tree().process_frame
+				if not is_inside_tree():
+					return
 				wait -= get_process_delta_time()
 	spawning_done = true
 
@@ -104,4 +115,6 @@ func on_enemy_died(_points: int):
 	alive -= 1
 	if alive <= 0 and spawning_done:
 		await get_tree().create_timer(wave_delay).timeout
+		if not is_inside_tree():
+			return
 		start_wave()

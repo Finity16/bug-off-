@@ -15,8 +15,10 @@ enum State { CHASE, WINDUP, RECOVER, HURT }
 @export var attack_pause := 0.7
 @export var close_distance := 80.0
 @export var rush_multiplier := 3.0
+@export var frame_width := 32
+@export var walk_fps := 8.0
 
-@onready var sprite: Sprite2D = $Sprite2D
+@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var body_shape: CollisionShape2D = $CollisionShape2D
 
 var state := State.CHASE
@@ -31,6 +33,9 @@ var flash_material: ShaderMaterial
 func _ready():
 	collision_layer = 2
 	collision_mask = 1
+	var paths := get_sheet_paths()
+	sprite.sprite_frames = build_frames(paths[randi() % paths.size()])
+	sprite.play("walk")
 	add_to_group("humans")
 	telegraph = Polygon2D.new()
 	telegraph.polygon = get_telegraph_shape()
@@ -86,6 +91,13 @@ func _physics_process(delta):
 		_:
 			velocity = velocity.move_toward(Vector2.ZERO, 600.0 * delta)
 	move_and_slide()
+
+	if absf(player.global_position.x - global_position.x) > 4.0:
+		sprite.flip_h = player.global_position.x < global_position.x
+	if velocity.length() > 10.0:
+		sprite.play("walk")
+	else:
+		sprite.play("idle")
 
 func chase(_delta: float):
 	var to_player := player.global_position - global_position
@@ -168,3 +180,28 @@ func die():
 	died.emit(100)
 	await get_tree().create_timer(0.15).timeout
 	queue_free()
+	
+func get_sheet_paths() -> PackedStringArray:
+	return PackedStringArray(["res://art/Human1.png", "res://art/Human2.png"])
+
+func build_frames(path: String) -> SpriteFrames:
+	var sheet: Texture2D = load(path)
+	var total := int(sheet.get_width() / frame_width)
+	var frames := SpriteFrames.new()
+	frames.remove_animation("default")
+	frames.add_animation("walk")
+	frames.set_animation_speed("walk", walk_fps)
+	frames.set_animation_loop("walk", true)
+	frames.add_animation("idle")
+	frames.set_animation_speed("idle", 1.0)
+	frames.set_animation_loop("idle", true)
+	for i in maxi(total - 1, 1):
+		frames.add_frame("walk", make_frame(sheet, i))
+	frames.add_frame("idle", make_frame(sheet, total - 1))
+	return frames
+
+func make_frame(sheet: Texture2D, index: int) -> AtlasTexture:
+	var atlas := AtlasTexture.new()
+	atlas.atlas = sheet
+	atlas.region = Rect2(index * frame_width, 0, frame_width, sheet.get_height())
+	return atlas

@@ -7,7 +7,9 @@ extends Human
 @export var spin_recover := 0.3
 
 var fill_tween: Tween
-
+func get_sheet_paths() -> PackedStringArray:
+	return PackedStringArray(["res://art/SpinnerHuman.png"])
+	
 func get_telegraph_shape() -> PackedVector2Array:
 	return make_circle(circle_radius)
 

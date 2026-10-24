@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://y1bge88h4xcg"]
 
 [ext_resource type="Script" uid="uid://crw2r3y8as5p8" path="res://scenes/smart_human.gd" id="1_1cbm2"]
-[ext_resource type="Texture2D" uid="uid://bla28axqtttob" path="res://icon.svg" id="2_jsuop"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ob1uy"]
 radius = 47.07441
@@ -12,10 +11,8 @@ speed = 140.0
 hit_range = 160.0
 attack_pause = 0.5
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=433660675]
-modulate = Color(0.30320585, 0.75761926, 0.77808493, 1)
-scale = Vector2(0.8, 0.8)
-texture = ExtResource("2_jsuop")
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1820891577]
+scale = Vector2(3.5, 3.5)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1324441236]
 shape = SubResource("CircleShape2D_ob1uy")
