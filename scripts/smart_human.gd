@@ -13,6 +13,9 @@ var waiting_time := 0.0
 func _ready():
 	super()
 	strafe_sign = 1.0 if randf() < 0.5 else -1.0
+	
+func get_sheet_paths() -> PackedStringArray:
+	return PackedStringArray(["res://art/SmartHuman.png"])
 
 func chase(delta: float):
 	var to_player := player.global_position - global_position

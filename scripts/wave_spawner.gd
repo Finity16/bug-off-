@@ -6,10 +6,10 @@ extends Node
 @export var max_enemies := 10
 @export var max_alive_at_once := 4
 @export var difficulty_cap := 8
-@export var spinner_unlock_wave := 3
-@export var smart_unlock_wave := 5
-@export var spinner_guaranteed_wave := 4
-@export var smart_guaranteed_wave := 6
+@export var spinner_unlock_wave := 2
+@export var smart_unlock_wave := 4
+@export var spinner_guaranteed_wave := 3
+@export var smart_guaranteed_wave := 5
 @export var wave_delay := 1.5
 @export var spawn_interval_min := 2.5
 @export var spawn_interval_max := 4.5
@@ -72,7 +72,7 @@ func run_wave(count: int, level: int):
 func pick_scene() -> PackedScene:
 	var spinner_weight := 0.0
 	if wave >= spinner_unlock_wave:
-		spinner_weight = clampf(4.0 + (wave - spinner_unlock_wave) * 1.5, 0.0, 10.0)
+		spinner_weight = clampf(2.0 + (wave - spinner_unlock_wave) * 1.5, 0.0, 10.0)
 	var smart_weight := 0.0
 	if wave >= smart_unlock_wave:
 		smart_weight = clampf(2.0 + (wave - smart_unlock_wave) * 1.5, 0.0, 10.0)
@@ -111,7 +111,8 @@ func pick_spawn_position() -> Vector2:
 			break
 	return pos
 
-func on_enemy_died(_points: int):
+func on_enemy_died(points: int):
+	Game.add_score(points)
 	alive -= 1
 	if alive <= 0 and spawning_done:
 		await get_tree().create_timer(wave_delay).timeout

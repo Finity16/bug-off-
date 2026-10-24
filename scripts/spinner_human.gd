@@ -10,16 +10,11 @@ var fill_tween: Tween
 func get_sheet_paths() -> PackedStringArray:
 	return PackedStringArray(["res://art/SpinnerHuman.png"])
 	
-func get_telegraph_shape() -> PackedVector2Array:
-	return make_circle(circle_radius)
+func get_telegraph_radius() -> float:
+	return circle_radius
 
-func make_circle(radius: float) -> PackedVector2Array:
-	var points := PackedVector2Array()
-	var steps := 48
-	for i in steps:
-		var a := TAU * i / steps
-		points.append(Vector2.from_angle(a) * radius)
-	return points
+func in_telegraph(p: Vector2, _angle: float) -> bool:
+	return p.length() <= circle_radius
 
 func player_in_attack_area() -> bool:
 	var distance := player.global_position.distance_to(global_position)
@@ -50,14 +45,14 @@ func start_attack():
 	can_attack = true
 
 func spin(duration: float):
-	telegraph.color = Color(1, 0, 0, 0.15)
+	telegraph.color = Color(cue_color, 0.15)
 	fill_tween = create_tween()
 	fill_tween.tween_property(telegraph, "color:a", 0.45, duration)
 	await get_tree().create_timer(duration).timeout
 	if dead:
 		return
 	fill_tween.kill()
-	telegraph.color = Color(1, 0, 0, 1)
+	telegraph.color = Color(hit_color, 1.0)
 	if player_in_attack_area():
 		player.take_hit(1, (player.global_position - global_position).normalized())
 	var fade := create_tween()

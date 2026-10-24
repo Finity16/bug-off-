@@ -1,10 +1,11 @@
 [gd_scene format=3 uid="uid://ctfv52gkj0n00"]
 
 [ext_resource type="PackedScene" uid="uid://b8x0v32cc5hu6" path="res://scenes/player.tscn" id="1_o5qli"]
-[ext_resource type="Script" uid="uid://djjd5q64a1ea4" path="res://scenes/wave_spawner.gd" id="2_0wfyh"]
+[ext_resource type="Script" uid="uid://djjd5q64a1ea4" path="res://scripts/wave_spawner.gd" id="2_0wfyh"]
 [ext_resource type="PackedScene" uid="uid://bgw17okcgefuq" path="res://scenes/spinner_human.tscn" id="3_sugp2"]
 [ext_resource type="PackedScene" uid="uid://44bwlakmln7m" path="res://scenes/human.tscn" id="3_tbgi4"]
 [ext_resource type="PackedScene" uid="uid://y1bge88h4xcg" path="res://scenes/smart_human.tscn" id="5_tefeu"]
+[ext_resource type="Script" uid="uid://cp0x2lx5iw4tr" path="res://scripts/hud.gd" id="6_tefeu"]
 
 [node name="Main" type="Node2D" unique_id=883377612]
 
@@ -16,3 +17,6 @@ script = ExtResource("2_0wfyh")
 human_scene = ExtResource("3_tbgi4")
 spinner_scene = ExtResource("3_sugp2")
 smart_scene = ExtResource("5_tefeu")
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1126913148]
+script = ExtResource("6_tefeu")

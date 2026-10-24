@@ -5,7 +5,7 @@ signal died(points: int)
 
 enum State { CHASE, WINDUP, RECOVER, HURT }
 
-@export var speed := 120.0
+@export var speed := 140.0
 @export var health := 4.0
 @export var attack_range := 170.0
 @export var hit_range := 120.0
@@ -17,6 +17,8 @@ enum State { CHASE, WINDUP, RECOVER, HURT }
 @export var rush_multiplier := 3.0
 @export var frame_width := 32
 @export var walk_fps := 8.0
+@export var pixel_size := 4.0
+@export var death_fps := 10.0
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var body_shape: CollisionShape2D = $CollisionShape2D
@@ -29,6 +31,8 @@ var aim_angle := 0.0
 var windup_progress := 0.0
 var telegraph: Polygon2D
 var flash_material: ShaderMaterial
+var cue_color := Color.html("db9591")
+var hit_color := Color.html("9d696a")
 
 func _ready():
 	collision_layer = 2
@@ -38,9 +42,14 @@ func _ready():
 	sprite.play("walk")
 	add_to_group("humans")
 	telegraph = Polygon2D.new()
-	telegraph.polygon = get_telegraph_shape()
-	telegraph.color = Color(1, 0, 0, 0)
+	var cells := int(ceil(get_telegraph_radius() / pixel_size)) * 2
+	var extent := cells * pixel_size / 2.0
+	telegraph.polygon = PackedVector2Array([Vector2(-extent, -extent), Vector2(extent, -extent), Vector2(extent, extent), Vector2(-extent, extent)])
+	telegraph.uv = PackedVector2Array([Vector2(0, 0), Vector2(cells, 0), Vector2(cells, cells), Vector2(0, cells)])
+	telegraph.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	telegraph.color = Color(cue_color, 0.0)
 	add_child(telegraph)
+	draw_telegraph(0.0)
 	var shader := Shader.new()
 	shader.code = """
 shader_type canvas_item;
@@ -52,9 +61,6 @@ void fragment() {
 	flash_material = ShaderMaterial.new()
 	flash_material.shader = shader
 	sprite.material = flash_material
-
-func get_telegraph_shape() -> PackedVector2Array:
-	return make_wedge(hit_range, attack_arc)
 
 func make_wedge(radius: float, arc_degrees: float) -> PackedVector2Array:
 	var points := PackedVector2Array([Vector2.ZERO])
@@ -124,8 +130,8 @@ func start_attack():
 	windup_progress = 0.0
 	velocity = Vector2.ZERO
 	aim_angle = (player.global_position - global_position).angle()
-	telegraph.rotation = aim_angle
-	telegraph.color = Color(1, 0, 0, 0.15)
+	draw_telegraph(aim_angle)
+	telegraph.color = Color(cue_color, 0.15)
 
 func tick_windup(delta: float):
 	var distance := player.global_position.distance_to(global_position)
@@ -137,7 +143,7 @@ func tick_windup(delta: float):
 
 func land_attack():
 	state = State.RECOVER
-	telegraph.color = Color(1, 0, 0, 1)
+	telegraph.color = Color(hit_color, 1.0)
 	if player_in_attack_area():
 		player.take_hit(1, Vector2.from_angle(aim_angle))
 	var tween := create_tween()
@@ -158,6 +164,7 @@ func set_flash(value: float):
 func take_hit(dmg: int, from_dir: Vector2):
 	if dead:
 		return
+	Game.add_score(10)
 	health -= dmg
 	if state != State.WINDUP:
 		velocity = from_dir * 200.0
@@ -178,7 +185,11 @@ func die():
 	body_shape.set_deferred("disabled", true)
 	telegraph.color.a = 0.0
 	died.emit(100)
-	await get_tree().create_timer(0.15).timeout
+	if sprite.sprite_frames.has_animation("death"):
+		sprite.play("death")
+		await sprite.animation_finished
+	else:
+		await get_tree().create_timer(0.15).timeout
 	queue_free()
 	
 func get_sheet_paths() -> PackedStringArray:
@@ -198,6 +209,15 @@ func build_frames(path: String) -> SpriteFrames:
 	for i in maxi(total - 1, 1):
 		frames.add_frame("walk", make_frame(sheet, i))
 	frames.add_frame("idle", make_frame(sheet, total - 1))
+	var death_path := path.replace(".png", "Death.png")
+	if ResourceLoader.exists(death_path):
+		var death_sheet: Texture2D = load(death_path)
+		var death_total := int(death_sheet.get_width() / frame_width)
+		frames.add_animation("death")
+		frames.set_animation_speed("death", death_fps)
+		frames.set_animation_loop("death", false)
+		for i in maxi(death_total, 1):
+			frames.add_frame("death", make_frame(death_sheet, i))
 	return frames
 
 func make_frame(sheet: Texture2D, index: int) -> AtlasTexture:
@@ -205,3 +225,22 @@ func make_frame(sheet: Texture2D, index: int) -> AtlasTexture:
 	atlas.atlas = sheet
 	atlas.region = Rect2(index * frame_width, 0, frame_width, sheet.get_height())
 	return atlas
+	
+func get_telegraph_radius() -> float:
+	return hit_range
+
+func in_telegraph(p: Vector2, angle: float) -> bool:
+	if p.length() > hit_range:
+		return false
+	return absf(angle_difference(angle, p.angle())) <= deg_to_rad(attack_arc / 2.0)
+
+func draw_telegraph(angle: float):
+	var cells := int(ceil(get_telegraph_radius() / pixel_size)) * 2
+	var half := cells / 2.0
+	var img := Image.create(cells, cells, false, Image.FORMAT_RGBA8)
+	for y in cells:
+		for x in cells:
+			var p := (Vector2(x + 0.5, y + 0.5) - Vector2(half, half)) * pixel_size
+			if in_telegraph(p, angle):
+				img.set_pixel(x, y, Color.WHITE)
+	telegraph.texture = ImageTexture.create_from_image(img)

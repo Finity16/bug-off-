@@ -1,15 +1,30 @@
 [gd_scene format=3 uid="uid://y1bge88h4xcg"]
 
-[ext_resource type="Script" uid="uid://crw2r3y8as5p8" path="res://scenes/smart_human.gd" id="1_1cbm2"]
+[ext_resource type="Script" uid="uid://crw2r3y8as5p8" path="res://scripts/smart_human.gd" id="1_1cbm2"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ob1uy"]
 radius = 47.07441
 
 [node name="Human" type="CharacterBody2D" unique_id=1264052602]
 script = ExtResource("1_1cbm2")
-speed = 140.0
+kite_distance = null
+kite_margin = null
+retreat_speed = null
+lunge_speed = null
+strafe_speed = null
+patience = null
+speed = null
+health = null
+attack_range = null
 hit_range = 160.0
+attack_arc = null
+windup_time = null
+recover_time = null
 attack_pause = 0.5
+close_distance = null
+rush_multiplier = null
+frame_width = null
+walk_fps = null
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1820891577]
 scale = Vector2(3.5, 3.5)

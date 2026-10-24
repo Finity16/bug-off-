@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://44bwlakmln7m"]
 
-[ext_resource type="Script" uid="uid://bpwqewl1aif1w" path="res://scenes/human.gd" id="1_cwf78"]
+[ext_resource type="Script" uid="uid://bpwqewl1aif1w" path="res://scripts/human.gd" id="1_cwf78"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ob1uy"]
 radius = 47.07441
