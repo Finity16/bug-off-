@@ -6,6 +6,8 @@
 [ext_resource type="PackedScene" uid="uid://44bwlakmln7m" path="res://scenes/human.tscn" id="3_tbgi4"]
 [ext_resource type="PackedScene" uid="uid://y1bge88h4xcg" path="res://scenes/smart_human.tscn" id="5_tefeu"]
 [ext_resource type="Script" uid="uid://cp0x2lx5iw4tr" path="res://scripts/hud.gd" id="6_tefeu"]
+[ext_resource type="Script" uid="uid://dlnpqsc74odaf" path="res://scripts/decor.gd" id="7_o6xl0"]
+[ext_resource type="Texture2D" uid="uid://bl5ysf1aypi5p" path="res://art/Decor.png" id="8_tipki"]
 
 [node name="Main" type="Node2D" unique_id=883377612]
 
@@ -20,3 +22,7 @@ smart_scene = ExtResource("5_tefeu")
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=1126913148]
 script = ExtResource("6_tefeu")
+
+[node name="Decor" type="Node2D" parent="." unique_id=1038825356]
+script = ExtResource("7_o6xl0")
+sheet = ExtResource("8_tipki")

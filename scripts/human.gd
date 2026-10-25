@@ -31,8 +31,9 @@ var aim_angle := 0.0
 var windup_progress := 0.0
 var telegraph: Polygon2D
 var flash_material: ShaderMaterial
-var cue_color := Color.html("db9591")
-var hit_color := Color.html("9d696a")
+var cue_color := Color.html("f26b6b")
+var hit_color := Color.html("e03a3a")
+var entered := false
 
 func _ready():
 	collision_layer = 2
@@ -97,6 +98,7 @@ func _physics_process(delta):
 		_:
 			velocity = velocity.move_toward(Vector2.ZERO, 600.0 * delta)
 	move_and_slide()
+	keep_on_screen()
 
 	if absf(player.global_position.x - global_position.x) > 4.0:
 		sprite.flip_h = player.global_position.x < global_position.x
@@ -244,3 +246,11 @@ func draw_telegraph(angle: float):
 			if in_telegraph(p, angle):
 				img.set_pixel(x, y, Color.WHITE)
 	telegraph.texture = ImageTexture.create_from_image(img)
+
+func keep_on_screen():
+	var size := get_viewport().get_visible_rect().size
+	var rect := Rect2(Vector2.ZERO, size).grow(-get_body_radius())
+	if not entered:
+		entered = rect.has_point(global_position)
+		return
+	global_position = global_position.clamp(rect.position, rect.end)

@@ -24,7 +24,6 @@ var wedge: Polygon2D
 func _ready():
 	collision_mask = 3
 	add_to_group("player")
-	add_to_group("player")
 	wedge = Polygon2D.new()
 	var cells := int(ceil(attack_radius / pixel_size)) * 2
 	var extent := cells * pixel_size / 2.0
@@ -49,6 +48,7 @@ func _physics_process(delta):
 	if stunned:
 		velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
 		move_and_slide()
+		keep_on_screen()
 		return
 
 	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
@@ -57,6 +57,7 @@ func _physics_process(delta):
 	else:
 		velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
 	move_and_slide()
+	keep_on_screen()
 
 	facing = (get_global_mouse_position() - global_position).normalized()
 	pivot.rotation = facing.angle()
@@ -143,3 +144,8 @@ func build_frames(path: String) -> SpriteFrames:
 			atlas.region = Rect2(i * frame_width, 0, frame_width, death_sheet.get_height())
 			frames.add_frame("death", atlas)
 	return frames
+	
+func keep_on_screen():
+	var size := get_viewport().get_visible_rect().size
+	var r := get_body_radius()
+	global_position = global_position.clamp(Vector2(r, r), size - Vector2(r, r))
